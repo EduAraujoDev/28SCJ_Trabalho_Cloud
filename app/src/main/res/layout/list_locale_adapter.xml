@@ -25,4 +25,11 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvLog"
         android:text="-23.99999999"/>
+
+    <View
+        android:id="@+id/dividerLocales"
+        android:layout_below="@id/tvLat"
+        android:background="@android:color/darker_gray"
+        android:layout_width="match_parent"
+        android:layout_height="0.8dp" />
 </RelativeLayout>
