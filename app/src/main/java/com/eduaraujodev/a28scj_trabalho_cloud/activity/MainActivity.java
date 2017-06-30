@@ -2,7 +2,7 @@ package com.eduaraujodev.a28scj_trabalho_cloud.activity;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
@@ -12,6 +12,8 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +21,7 @@ import com.eduaraujodev.a28scj_trabalho_cloud.R;
 import com.eduaraujodev.a28scj_trabalho_cloud.adapter.ListLocaleAdapter;
 import com.eduaraujodev.a28scj_trabalho_cloud.domain.Locale;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,10 +34,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.security.AccessController.getContext;
-
 public class MainActivity extends AppCompatActivity {
-    private static final String URL = "http://www.mocky.io/v2/595305b0270000b000b2a976";
+    private static final String URL = "http://54.214.215.34:8080/api/v1/getMarkers";
 
     private List<Locale> locales = new ArrayList<>();;
     private RecyclerView rvLocales;
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onRefresh() {
+                locales = new ArrayList<>();
                 new BuscaLocales().execute();
             }
         };
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 conn.setConnectTimeout(10000);
 
                 conn.setRequestMethod("GET");
-                conn.setDoOutput(true);
+                //conn.setDoOutput(true);
 
                 if(conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     InputStream is = conn.getInputStream();
@@ -140,13 +142,18 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Erro ao buscar localizações", Toast.LENGTH_LONG).show();
             } else {
                 try {
-                    JSONObject json = new JSONObject(s);
+                    JSONArray json = new JSONArray(s);
 
                     if (json != null) {
-                        Locale locale = new Locale();
-                        locale.log = json.getString("longitude");
-                        locale.lat = json.getString("latitude");
-                        locales.add(locale);
+                        for (int i = 0; i < json.length(); i++) {
+                            JSONObject data = json.getJSONObject(i);
+                            Locale locale = new Locale();
+                            locale.log = data.getDouble("longitude");
+                            locale.lat = data.getDouble("latitude");
+                            locale.dataHora = "29/06/2017 - 20:37";
+
+                            locales.add(locale);
+                        }
 
                         setUpLista(locales);
                     }
@@ -158,12 +165,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpLista(List<Locale> lista) {
-        listLocaleAdapter = new ListLocaleAdapter(this, lista);
+        listLocaleAdapter = new ListLocaleAdapter(this, lista, localeOnClickListener());
         rvLocales.setLayoutManager(new LinearLayoutManager(this));
         rvLocales.setAdapter(listLocaleAdapter);
 
         if (locales.size() > 0) {
             tvSemLocalizacao.setText("");
         }
+    }
+
+    private ListLocaleAdapter.LocaleOnClickListener localeOnClickListener() {
+        return new ListLocaleAdapter.LocaleOnClickListener() {
+            @Override
+            public void onClickLocale(View view, int posicao) {
+                Locale locale = locales.get(posicao);
+
+                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                intent.putExtra("locale", locale);
+
+                startActivity(intent);
+            }
+        };
     }
 }

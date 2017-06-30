@@ -6,22 +6,22 @@ import android.os.Parcelable;
 public class Locale implements Parcelable {
     public long id;
     public String dataHora;
-    public String log;
-    public String lat;
+    public double log;
+    public double lat;
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
         dest.writeString(dataHora);
-        dest.writeString(log);
-        dest.writeString(lat);
+        dest.writeDouble(log);
+        dest.writeDouble(lat);
     }
 
     public void readFromParcel(Parcel parcel) {
         this.id = parcel.readLong();
         this.dataHora = parcel.readString();
-        this.log = parcel.readString();
-        this.lat = parcel.readString();
+        this.log = parcel.readDouble();
+        this.lat = parcel.readDouble();
     }
 
     @Override

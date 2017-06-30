@@ -16,11 +16,13 @@ public class ListLocaleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private Context context;
     private LayoutInflater inflater;
     private List<Locale> locales;
+    private LocaleOnClickListener localeOnClickListener;
 
-    public ListLocaleAdapter(Context context, List<Locale> locales) {
+    public ListLocaleAdapter(Context context, List<Locale> locales, LocaleOnClickListener localeOnClickListener) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
         this.locales = locales;
+        this.localeOnClickListener = localeOnClickListener;
     }
 
     @Override
@@ -31,13 +33,21 @@ public class ListLocaleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         Locale locale = locales.get(position);
 
         LocaleItemHolder localeItemHolder = (LocaleItemHolder) holder;
         localeItemHolder.tvDataHora.setText(locale.dataHora);
-        localeItemHolder.tvLog.setText(locale.log);
-        localeItemHolder.tvLat.setText(locale.lat);
+        localeItemHolder.tvLog.setText(String.valueOf(locale.log));
+        localeItemHolder.tvLat.setText(String.valueOf(locale.lat));
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                localeOnClickListener.onClickLocale(holder.itemView, position);
+            }
+        });
     }
 
     @Override
@@ -58,5 +68,9 @@ public class ListLocaleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             tvLog = (TextView) itemView.findViewById(R.id.tvLog);
             tvLat = (TextView) itemView.findViewById(R.id.tvLat);
         }
+    }
+
+    public interface LocaleOnClickListener {
+        void onClickLocale(View view, int posicao);
     }
 }
